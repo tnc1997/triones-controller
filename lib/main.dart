@@ -161,28 +161,30 @@ class _DeviceScreenState extends State<DeviceScreen> {
                         await showDialog(
                           context: context,
                           builder: (context) {
-                            return AlertDialog(
-                              content: ColorPicker(
-                                pickerColor: _color,
-                                onColorChanged: (color) {
-                                  _debouncer.run(() async {
-                                    await characteristic.write([
-                                      0x56,
-                                      _color.red,
-                                      _color.green,
-                                      _color.blue,
-                                      0x00,
-                                      0xF0,
-                                      0xAA,
-                                    ]);
-
+                            return SimpleDialog(
+                              children: [
+                                ColorPicker(
+                                  pickerColor: _color,
+                                  onColorChanged: (color) {
                                     setState(() {
                                       _color = color;
                                     });
-                                  });
-                                },
-                                enableAlpha: false,
-                              ),
+
+                                    _debouncer.run(() async {
+                                      await characteristic.write([
+                                        0x56,
+                                        _color.red,
+                                        _color.green,
+                                        _color.blue,
+                                        0x00,
+                                        0xF0,
+                                        0xAA,
+                                      ]);
+                                    });
+                                  },
+                                  enableAlpha: false,
+                                ),
+                              ],
                             );
                           },
                         );
