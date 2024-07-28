@@ -213,7 +213,7 @@ class ServiceScreen extends StatelessWidget {
   }
 }
 
-class CharacteristicScreen extends StatelessWidget {
+class CharacteristicScreen extends StatefulWidget {
   const CharacteristicScreen({
     super.key,
     required this.characteristic,
@@ -222,14 +222,40 @@ class CharacteristicScreen extends StatelessWidget {
   final BluetoothCharacteristic characteristic;
 
   @override
+  State<CharacteristicScreen> createState() {
+    return _CharacteristicScreenState();
+  }
+}
+
+class _CharacteristicScreenState extends State<CharacteristicScreen> {
+  var _power = false;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(characteristic.characteristicUuid.str),
+        actions: [
+          if (widget.characteristic.properties.write)
+            IconButton(
+              onPressed: () async {
+                await widget.characteristic.write([
+                  0xCC,
+                  _power ? 0x24 : 0x23,
+                  0x33,
+                ]);
+
+                setState(() {
+                  _power = !_power;
+                });
+              },
+              icon: Icon(_power ? Icons.power_off : Icons.power),
+            ),
+        ],
+        title: Text(widget.characteristic.characteristicUuid.str),
       ),
       body: ListView(
         children: [
-          ...characteristic.descriptors.map(
+          ...widget.characteristic.descriptors.map(
             (descriptor) {
               return ListTile(
                 title: Text(descriptor.descriptorUuid.str),
@@ -237,7 +263,7 @@ class CharacteristicScreen extends StatelessWidget {
             },
           ),
           ListTile(
-            title: Text('${characteristic.properties}'),
+            title: Text('${widget.characteristic.properties}'),
           ),
         ],
       ),
