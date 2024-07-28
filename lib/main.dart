@@ -115,6 +115,7 @@ class DeviceScreen extends StatefulWidget {
 }
 
 class _DeviceScreenState extends State<DeviceScreen> {
+  var _brightness = 0.0;
   late final Future<BluetoothCharacteristic?> _characteristic;
   var _color = Colors.white;
   final _debouncer = Debouncer(duration: const Duration(milliseconds: 500));
@@ -191,6 +192,42 @@ class _DeviceScreenState extends State<DeviceScreen> {
                       },
                       icon: const Icon(Icons.color_lens),
                       label: const Text('Color'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.brightness_low),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                            ),
+                            child: Slider(
+                              value: _brightness,
+                              onChanged: (brightness) {
+                                setState(() {
+                                  _brightness = brightness;
+                                });
+
+                                _debouncer.run(() async {
+                                  await characteristic.write([
+                                    0x56,
+                                    0x00,
+                                    0x00,
+                                    0x00,
+                                    (brightness * 255).round(),
+                                    0x0F,
+                                    0xAA,
+                                  ]);
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                        const Icon(Icons.brightness_high),
+                      ],
                     ),
                   ),
                 ],
