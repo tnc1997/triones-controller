@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -113,6 +116,8 @@ class DeviceScreen extends StatefulWidget {
 
 class _DeviceScreenState extends State<DeviceScreen> {
   late final Future<BluetoothCharacteristic?> _characteristic;
+  var _color = Colors.white;
+  final _debouncer = Debouncer(duration: const Duration(milliseconds: 500));
   var _power = false;
 
   @override
@@ -145,8 +150,45 @@ class _DeviceScreenState extends State<DeviceScreen> {
                           _power = !_power;
                         });
                       },
-                      icon: const Icon(Icons.power),
+                      icon: const Icon(Icons.power_settings_new),
                       label: const Text('Power'),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              content: ColorPicker(
+                                pickerColor: _color,
+                                onColorChanged: (color) {
+                                  _debouncer.run(() async {
+                                    await characteristic.write([
+                                      0x56,
+                                      _color.red,
+                                      _color.green,
+                                      _color.blue,
+                                      0x00,
+                                      0xF0,
+                                      0xAA,
+                                    ]);
+
+                                    setState(() {
+                                      _color = color;
+                                    });
+                                  });
+                                },
+                                enableAlpha: false,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.color_lens),
+                      label: const Text('Color'),
                     ),
                   ),
                 ],
@@ -170,6 +212,8 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
   @override
   void dispose() {
+    _debouncer.dispose();
+
     widget.device.disconnect();
 
     super.dispose();
@@ -192,5 +236,24 @@ class _DeviceScreenState extends State<DeviceScreen> {
 
       return null;
     });
+  }
+}
+
+class Debouncer {
+  final Duration _duration;
+  Timer? _timer;
+
+  Debouncer({
+    required Duration duration,
+  }) : _duration = duration;
+
+  void run(void Function() callback) {
+    _timer?.cancel();
+
+    _timer = Timer(_duration, callback);
+  }
+
+  void dispose() {
+    _timer?.cancel();
   }
 }
