@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,61 +20,226 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const MyHomePage(
-        title: 'Flutter Demo Home Page',
+      home: const ScanScreen(),
+    );
+  }
+}
+
+class ScanScreen extends StatefulWidget {
+  const ScanScreen({
+    super.key,
+  });
+
+  @override
+  State<ScanScreen> createState() {
+    return _ScanScreenState();
+  }
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Scan'),
+      ),
+      body: StreamBuilder(
+        stream: FlutterBluePlus.scanResults,
+        builder: (context, snapshot) {
+          if (snapshot.data case final results?) {
+            return ListView.builder(
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(results[index].device.platformName),
+                  onTap: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return DeviceScreen(
+                            device: results[index].device,
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+              itemCount: results.length,
+            );
+          }
+
+          if (snapshot.error case final error?) {
+            return Center(
+              child: Text('$error'),
+            );
+          }
+
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    FlutterBluePlus.startScan(
+      withKeywords: [
+        'Triones',
+      ],
+      timeout: const Duration(
+        seconds: 5,
       ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+class DeviceScreen extends StatefulWidget {
+  const DeviceScreen({
     super.key,
-    required this.title,
+    required this.device,
   });
 
-  final String title;
+  final BluetoothDevice device;
 
   @override
-  State<MyHomePage> createState() {
-    return _MyHomePageState();
+  State<DeviceScreen> createState() {
+    return _DeviceScreenState();
   }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class _DeviceScreenState extends State<DeviceScreen> {
+  late final Future<List<BluetoothService>> _services;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(widget.device.platformName),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+      body: FutureBuilder(
+        future: _services,
+        builder: (context, snapshot) {
+          if (snapshot.data case final services?) {
+            return ListView.builder(
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(services[index].serviceUuid.str),
+                  onTap: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ServiceScreen(
+                            service: services[index],
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+              itemCount: services.length,
+            );
+          }
+
+          if (snapshot.error case final error?) {
+            return Center(
+              child: Text('$error'),
+            );
+          }
+
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+
+  @override
+  void dispose() {
+    widget.device.disconnect();
+
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _services = widget.device.connect().then((_) async {
+      return await widget.device.discoverServices();
+    });
+  }
+}
+
+class ServiceScreen extends StatelessWidget {
+  const ServiceScreen({
+    super.key,
+    required this.service,
+  });
+
+  final BluetoothService service;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(service.serviceUuid.str),
+      ),
+      body: ListView.builder(
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(service.characteristics[index].characteristicUuid.str),
+            onTap: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return CharacteristicScreen(
+                      characteristic: service.characteristics[index],
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+        itemCount: service.characteristics.length,
+      ),
+    );
+  }
+}
+
+class CharacteristicScreen extends StatelessWidget {
+  const CharacteristicScreen({
+    super.key,
+    required this.characteristic,
+  });
+
+  final BluetoothCharacteristic characteristic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(characteristic.characteristicUuid.str),
+      ),
+      body: ListView(
+        children: [
+          ...characteristic.descriptors.map(
+            (descriptor) {
+              return ListTile(
+                title: Text(descriptor.descriptorUuid.str),
+              );
+            },
+          ),
+          ListTile(
+            title: Text('${characteristic.properties}'),
+          ),
+        ],
       ),
     );
   }
