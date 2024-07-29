@@ -115,11 +115,35 @@ class DeviceScreen extends StatefulWidget {
 }
 
 class _DeviceScreenState extends State<DeviceScreen> {
-  var _brightness = 0.0;
+  static const _modes = {
+    0x25: 'Pulsating Rainbow',
+    0x26: 'Pulsating Red',
+    0x27: 'Pulsating Green',
+    0x28: 'Pulsating Blue',
+    0x29: 'Pulsating Yellow',
+    0x2A: 'Pulsating Cyan',
+    0x2B: 'Pulsating Purple',
+    0x2C: 'Pulsating White',
+    0x2D: 'Pulsating Red Green',
+    0x2E: 'Pulsating Red Blue',
+    0x2F: 'Pulsating Green Blue',
+    0x30: 'Rainbow Strobe',
+    0x31: 'Red Strobe',
+    0x32: 'Green Strobe',
+    0x33: 'Blue Strobe',
+    0x34: 'Yellow Strobe',
+    0x35: 'Cyan Strobe',
+    0x36: 'Purple Strobe',
+    0x37: 'White Strobe',
+    0x38: 'Rainbow Jumping Change',
+  };
+
+  double _brightness = 0;
   late final Future<BluetoothCharacteristic?> _characteristic;
-  var _color = Colors.white;
+  Color _color = Colors.white;
   final _debouncer = Debouncer(duration: const Duration(milliseconds: 500));
-  var _power = false;
+  int? _mode;
+  bool _power = false;
 
   @override
   Widget build(BuildContext context) {
@@ -227,6 +251,34 @@ class _DeviceScreenState extends State<DeviceScreen> {
                           ),
                         ),
                         const Icon(Icons.brightness_high),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: DropdownMenu(
+                      label: const Text('Mode'),
+                      onSelected: (mode) async {
+                        if (mode != null) {
+                          await characteristic.write([
+                            0xBB,
+                            mode,
+                            0x00,
+                            0x44,
+                          ]);
+                        }
+
+                        setState(() {
+                          _mode = mode;
+                        });
+                      },
+                      expandedInsets: EdgeInsets.zero,
+                      dropdownMenuEntries: [
+                        for (final entry in _modes.entries)
+                          DropdownMenuEntry(
+                            value: entry.key,
+                            label: entry.value,
+                          ),
                       ],
                     ),
                   ),
