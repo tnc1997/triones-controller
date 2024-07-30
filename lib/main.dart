@@ -138,7 +138,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     0x38: 'Rainbow Jumping Change',
   };
 
-  double _brightness = 0;
+  double _brightness = 1;
   late final Future<BluetoothCharacteristic?> _characteristic;
   Color _color = Colors.white;
   final _debouncer = Debouncer(duration: const Duration(milliseconds: 500));
@@ -196,11 +196,15 @@ class _DeviceScreenState extends State<DeviceScreen> {
                                     });
 
                                     _debouncer.run(() async {
+                                      final color = _color.withBrightness(
+                                        _brightness,
+                                      );
+
                                       await characteristic.write([
                                         0x56,
-                                        _color.red,
-                                        _color.green,
-                                        _color.blue,
+                                        color.red,
+                                        color.green,
+                                        color.blue,
                                         0x00,
                                         0xF0,
                                         0xAA,
@@ -236,13 +240,17 @@ class _DeviceScreenState extends State<DeviceScreen> {
                                 });
 
                                 _debouncer.run(() async {
+                                  final color = _color.withBrightness(
+                                    _brightness,
+                                  );
+
                                   await characteristic.write([
                                     0x56,
+                                    color.red,
+                                    color.green,
+                                    color.blue,
                                     0x00,
-                                    0x00,
-                                    0x00,
-                                    (brightness * 255).round(),
-                                    0x0F,
+                                    0xF0,
                                     0xAA,
                                   ]);
                                 });
@@ -346,5 +354,16 @@ class Debouncer {
 
   void dispose() {
     _timer?.cancel();
+  }
+}
+
+extension on Color {
+  Color withBrightness(double brightness) {
+    return Color.fromARGB(
+      alpha,
+      (red * brightness).round(),
+      (green * brightness).round(),
+      (blue * brightness).round(),
+    );
   }
 }
