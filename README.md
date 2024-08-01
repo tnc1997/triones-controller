@@ -1,6 +1,6 @@
 # Controller for Triones
 
-A new Flutter project.
+Please note that Controller for Triones is unofficial and not endorsed by Triones.
 
 ## Getting Started
 
