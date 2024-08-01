@@ -1,4 +1,4 @@
-# Triones Controller
+# Controller for Triones
 
 A new Flutter project.
 

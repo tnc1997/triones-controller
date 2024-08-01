@@ -1,6 +1,6 @@
 {
-    "name": "Triones Controller",
-    "short_name": "Triones Controller",
+    "name": "Controller for Triones",
+    "short_name": "Controller for Triones",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
