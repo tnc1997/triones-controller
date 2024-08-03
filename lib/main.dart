@@ -18,9 +18,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Controller for Triones',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00006E),
-        ),
+        brightness: Brightness.light,
+        colorSchemeSeed: const Color(0xFF00006E),
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        colorSchemeSeed: const Color(0xFF00006E),
       ),
       home: const ScanScreen(),
     );
