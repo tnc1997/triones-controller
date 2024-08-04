@@ -4,6 +4,10 @@ import 'package:collection/collection.dart';
 
 class TrionesClient {}
 
+class TrionesException implements Exception {
+  const TrionesException();
+}
+
 List<int>? _normalize(
   List<int>? uuid,
 ) {
