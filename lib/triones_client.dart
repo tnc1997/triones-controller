@@ -2,7 +2,13 @@ import 'dart:core';
 
 import 'package:collection/collection.dart';
 
-class TrionesClient {}
+class TrionesClient {
+  final TrionesBluetoothDevice _device;
+
+  TrionesClient({
+    required TrionesBluetoothDevice device,
+  }) : _device = device;
+}
 
 /// Represents a characteristic provided by a service.
 abstract interface class TrionesBluetoothCharacteristic {
