@@ -4,6 +4,16 @@ import 'package:collection/collection.dart';
 
 class TrionesClient {}
 
+class TrionesBluetoothCharacteristicUuids {
+  static const data = '0000ffd4-0000-1000-8000-00805f9b34fb';
+  static const wrgb = '0000ffd9-0000-1000-8000-00805f9b34fb';
+}
+
+class TrionesBluetoothServiceUuids {
+  static const data = '0000ffd0-0000-1000-8000-00805f9b34fb';
+  static const wrgb = '0000ffd5-0000-1000-8000-00805f9b34fb';
+}
+
 class TrionesException implements Exception {
   const TrionesException();
 }
