@@ -4,6 +4,27 @@ import 'package:collection/collection.dart';
 
 class TrionesClient {}
 
+/// Represents a characteristic provided by a service.
+abstract interface class TrionesBluetoothCharacteristic {
+  /// Reads the data from this characteristic.
+  Future<List<int>> read();
+
+  /// Writes the [data] to this characteristic.
+  Future<void> write(List<int> data);
+}
+
+/// Represents a device.
+abstract interface class TrionesBluetoothDevice {
+  /// Gets the service for the [uuid].
+  Future<TrionesBluetoothService> getService(String uuid);
+}
+
+/// Represents a service provided by a device.
+abstract interface class TrionesBluetoothService {
+  /// Gets the characteristic for the [uuid].
+  Future<TrionesBluetoothCharacteristic> getCharacteristic(String uuid);
+}
+
 class TrionesBluetoothCharacteristicUuids {
   static const data = '0000ffd4-0000-1000-8000-00805f9b34fb';
   static const wrgb = '0000ffd9-0000-1000-8000-00805f9b34fb';
