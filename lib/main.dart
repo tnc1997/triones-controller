@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
+import 'triones_client.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -118,26 +120,26 @@ class DeviceScreen extends StatefulWidget {
 
 class _DeviceScreenState extends State<DeviceScreen> {
   static const _modes = {
-    0x25: 'Pulsating Rainbow',
-    0x26: 'Pulsating Red',
-    0x27: 'Pulsating Green',
-    0x28: 'Pulsating Blue',
-    0x29: 'Pulsating Yellow',
-    0x2A: 'Pulsating Cyan',
-    0x2B: 'Pulsating Purple',
-    0x2C: 'Pulsating White',
-    0x2D: 'Pulsating Red Green',
-    0x2E: 'Pulsating Red Blue',
-    0x2F: 'Pulsating Green Blue',
-    0x30: 'Rainbow Strobe',
-    0x31: 'Red Strobe',
-    0x32: 'Green Strobe',
-    0x33: 'Blue Strobe',
-    0x34: 'Yellow Strobe',
-    0x35: 'Cyan Strobe',
-    0x36: 'Purple Strobe',
-    0x37: 'White Strobe',
-    0x38: 'Rainbow Jumping Change',
+    TrionesModes.pulsatingRainbow: 'Pulsating Rainbow',
+    TrionesModes.pulsatingRed: 'Pulsating Red',
+    TrionesModes.pulsatingGreen: 'Pulsating Green',
+    TrionesModes.pulsatingBlue: 'Pulsating Blue',
+    TrionesModes.pulsatingYellow: 'Pulsating Yellow',
+    TrionesModes.pulsatingCyan: 'Pulsating Cyan',
+    TrionesModes.pulsatingPurple: 'Pulsating Purple',
+    TrionesModes.pulsatingWhite: 'Pulsating White',
+    TrionesModes.pulsatingRedGreen: 'Pulsating Red Green',
+    TrionesModes.pulsatingRedBlue: 'Pulsating Red Blue',
+    TrionesModes.pulsatingGreenBlue: 'Pulsating Green Blue',
+    TrionesModes.rainbowStrobe: 'Rainbow Strobe',
+    TrionesModes.redStrobe: 'Red Strobe',
+    TrionesModes.greenStrobe: 'Green Strobe',
+    TrionesModes.blueStrobe: 'Blue Strobe',
+    TrionesModes.yellowStrobe: 'Yellow Strobe',
+    TrionesModes.cyanStrobe: 'Cyan Strobe',
+    TrionesModes.purpleStrobe: 'Purple Strobe',
+    TrionesModes.whiteStrobe: 'White Strobe',
+    TrionesModes.rainbowJumpingChange: 'Rainbow Jumping Change',
   };
 
   double _brightness = 1;
