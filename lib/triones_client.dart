@@ -17,6 +17,22 @@ class TrionesClient {
     required TrionesBluetoothDevice device,
   }) : _device = device;
 
+  Future<void> turnOff() async {
+    final service = await _device.getService(
+      TrionesBluetoothServiceUuids.wrgb,
+    );
+
+    final characteristic = await service.getCharacteristic(
+      TrionesBluetoothCharacteristicUuids.wrgb,
+    );
+
+    await characteristic.write([
+      0xCC,
+      0x24,
+      0x33,
+    ]);
+  }
+
   Future<void> turnOn() async {
     final service = await _device.getService(
       TrionesBluetoothServiceUuids.wrgb,
