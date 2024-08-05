@@ -47,11 +47,11 @@ class TrionesModes {
 
 /// Represents a characteristic provided by a service.
 abstract interface class TrionesBluetoothCharacteristic {
-  /// Reads the data from this characteristic.
+  /// Reads the value from this characteristic.
   Future<List<int>> read();
 
-  /// Writes the [data] to this characteristic.
-  Future<void> write(List<int> data);
+  /// Writes the [value] to this characteristic.
+  Future<void> write(List<int> value);
 }
 
 /// Represents a device.
