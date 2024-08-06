@@ -17,6 +17,34 @@ class TrionesClient {
     required TrionesBluetoothDevice device,
   }) : _device = device;
 
+  Future<void> setColor(
+    int red,
+    int green,
+    int blue,
+  ) async {
+    RangeError.checkValueInInterval(red, 0x00, 0xFF, 'red');
+    RangeError.checkValueInInterval(green, 0x00, 0xFF, 'green');
+    RangeError.checkValueInInterval(blue, 0x00, 0xFF, 'blue');
+
+    final service = await _device.getService(
+      TrionesBluetoothServiceUuids.wrgb,
+    );
+
+    final characteristic = await service.getCharacteristic(
+      TrionesBluetoothCharacteristicUuids.wrgb,
+    );
+
+    await characteristic.write([
+      0x56,
+      red,
+      green,
+      blue,
+      0x00,
+      0xF0,
+      0xAA,
+    ]);
+  }
+
   Future<void> turnOff() async {
     final service = await _device.getService(
       TrionesBluetoothServiceUuids.wrgb,
