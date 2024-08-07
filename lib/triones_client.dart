@@ -45,6 +45,29 @@ class TrionesClient {
     ]);
   }
 
+  Future<void> setMode(
+    int mode, {
+    int speed = 0xFF,
+  }) async {
+    RangeError.checkValueInInterval(mode, 0x25, 0x38, 'mode');
+    RangeError.checkValueInInterval(speed, 0x00, 0xFF, 'speed');
+
+    final service = await _device.getService(
+      TrionesBluetoothServiceUuids.wrgb,
+    );
+
+    final characteristic = await service.getCharacteristic(
+      TrionesBluetoothCharacteristicUuids.wrgb,
+    );
+
+    await characteristic.write([
+      0xBB,
+      mode,
+      speed,
+      0x44,
+    ]);
+  }
+
   Future<void> turnOff() async {
     final service = await _device.getService(
       TrionesBluetoothServiceUuids.wrgb,
