@@ -68,6 +68,30 @@ class TrionesClient {
     ]);
   }
 
+  Future<void> setWhite({
+    int brightness = 0xFF,
+  }) async {
+    RangeError.checkValueInInterval(brightness, 0x00, 0xFF, 'brightness');
+
+    final service = await _device.getService(
+      TrionesBluetoothServiceUuids.wrgb,
+    );
+
+    final characteristic = await service.getCharacteristic(
+      TrionesBluetoothCharacteristicUuids.wrgb,
+    );
+
+    await characteristic.write([
+      0x56,
+      0x00,
+      0x00,
+      0x00,
+      brightness,
+      0x0F,
+      0xAA,
+    ]);
+  }
+
   Future<void> turnOff() async {
     final service = await _device.getService(
       TrionesBluetoothServiceUuids.wrgb,
