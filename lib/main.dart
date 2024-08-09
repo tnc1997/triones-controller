@@ -371,3 +371,66 @@ extension on Color {
     );
   }
 }
+
+class FlutterBluePlusBluetoothCharacteristic
+    implements TrionesBluetoothCharacteristic {
+  final BluetoothCharacteristic _characteristic;
+
+  FlutterBluePlusBluetoothCharacteristic({
+    required BluetoothCharacteristic characteristic,
+  }) : _characteristic = characteristic;
+
+  @override
+  Future<List<int>> read() async {
+    return await _characteristic.read();
+  }
+
+  @override
+  Future<void> write(List<int> value) async {
+    await _characteristic.write(value);
+  }
+}
+
+class FlutterBluePlusBluetoothDevice implements TrionesBluetoothDevice {
+  final BluetoothDevice _device;
+
+  FlutterBluePlusBluetoothDevice({
+    required BluetoothDevice device,
+  }) : _device = device;
+
+  @override
+  Future<TrionesBluetoothService> getService(String uuid) async {
+    if (_device.servicesList.isEmpty) {
+      await _device.discoverServices();
+    }
+
+    return FlutterBluePlusBluetoothService(
+      service: _device.servicesList.singleWhere(
+        (service) {
+          return service.uuid == Guid.fromString(uuid);
+        },
+      ),
+    );
+  }
+}
+
+class FlutterBluePlusBluetoothService implements TrionesBluetoothService {
+  final BluetoothService _service;
+
+  FlutterBluePlusBluetoothService({
+    required BluetoothService service,
+  }) : _service = service;
+
+  @override
+  Future<TrionesBluetoothCharacteristic> getCharacteristic(String uuid) {
+    return Future.value(
+      FlutterBluePlusBluetoothCharacteristic(
+        characteristic: _service.characteristics.singleWhere(
+          (characteristic) {
+            return characteristic.uuid == Guid.fromString(uuid);
+          },
+        ),
+      ),
+    );
+  }
+}
