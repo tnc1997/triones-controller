@@ -59,7 +59,22 @@ class _ScanScreenState extends State<ScanScreen> {
                 return ListTile(
                   title: Text(results[index].device.platformName),
                   onTap: () async {
-                    await results[index].device.connect();
+                    try {
+                      await results[index].device.connect();
+                    } catch (e) {
+                      if (context.mounted) {
+                        return await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return SimpleDialog(
+                              children: [
+                                Text('$e'),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
 
                     if (context.mounted) {
                       await Navigator.of(context).push(
