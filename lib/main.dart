@@ -167,6 +167,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
   final _debouncer = Debouncer(duration: const Duration(milliseconds: 500));
   int? _mode;
   bool _power = false;
+  double _speed = 0.5;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +280,10 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 label: const Text('Mode'),
                 onSelected: (mode) async {
                   if (mode != null) {
-                    await _client.setMode(mode);
+                    await _client.setMode(
+                      mode,
+                      speed: (255 * _speed).round(),
+                    );
                   }
 
                   setState(() {
@@ -296,6 +300,38 @@ class _DeviceScreenState extends State<DeviceScreen> {
                 ],
               ),
             ),
+            if (_mode case final mode?)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.speed),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                        ),
+                        child: Slider(
+                          value: _speed,
+                          onChanged: (speed) {
+                            setState(() {
+                              _speed = speed;
+                            });
+
+                            _debouncer.run(() async {
+                              await _client.setMode(
+                                mode,
+                                speed: (255 * _speed).round(),
+                              );
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    const Icon(Icons.speed),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
