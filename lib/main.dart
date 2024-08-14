@@ -49,6 +49,23 @@ class _ScanScreenState extends State<ScanScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scan'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await FlutterBluePlus.startScan(
+                withKeywords: [
+                  'Triones',
+                ],
+                timeout: const Duration(
+                  seconds: 5,
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.refresh,
+            ),
+          ),
+        ],
       ),
       body: StreamBuilder(
         stream: FlutterBluePlus.scanResults,
@@ -68,7 +85,7 @@ class _ScanScreenState extends State<ScanScreen> {
                           builder: (context) {
                             return SimpleDialog(
                               children: [
-                                Text('$e'),
+                                Text(e.toString()),
                               ],
                             );
                           },
@@ -104,20 +121,6 @@ class _ScanScreenState extends State<ScanScreen> {
             child: CircularProgressIndicator(),
           );
         },
-      ),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    FlutterBluePlus.startScan(
-      withKeywords: [
-        'Triones',
-      ],
-      timeout: const Duration(
-        seconds: 5,
       ),
     );
   }
