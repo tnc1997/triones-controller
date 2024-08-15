@@ -52,14 +52,29 @@ class _ScanScreenState extends State<ScanScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              await FlutterBluePlus.startScan(
-                withKeywords: [
-                  'Triones',
-                ],
-                timeout: const Duration(
-                  seconds: 5,
-                ),
-              );
+              try {
+                await FlutterBluePlus.startScan(
+                  withKeywords: [
+                    'Triones',
+                  ],
+                  timeout: const Duration(
+                    seconds: 5,
+                  ),
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  return await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        children: [
+                          Text(e.toString()),
+                        ],
+                      );
+                    },
+                  );
+                }
+              }
             },
             icon: const Icon(
               Icons.refresh,
