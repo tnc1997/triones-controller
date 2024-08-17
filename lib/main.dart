@@ -32,18 +32,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ScanScreen extends StatefulWidget {
+class ScanScreen extends StatelessWidget {
   const ScanScreen({
     super.key,
   });
 
-  @override
-  State<ScanScreen> createState() {
-    return _ScanScreenState();
-  }
-}
-
-class _ScanScreenState extends State<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
