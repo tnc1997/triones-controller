@@ -40,95 +40,91 @@ class ScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Scan'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              try {
-                await FlutterBluePlus.startScan(
-                  withKeywords: [
-                    'Triones',
-                  ],
-                  timeout: const Duration(
-                    seconds: 5,
-                  ),
-                );
-              } catch (e) {
-                if (context.mounted) {
-                  return await showDialog(
-                    context: context,
-                    builder: (context) {
-                      return SimpleDialog(
-                        children: [
-                          Text(e.toString()),
-                        ],
-                      );
-                    },
-                  );
-                }
-              }
-            },
-            icon: const Icon(
-              Icons.refresh,
-            ),
-          ),
-        ],
-      ),
-      body: StreamBuilder(
-        stream: FlutterBluePlus.scanResults,
-        builder: (context, snapshot) {
-          if (snapshot.data case final results?) {
-            return ListView.builder(
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(results[index].device.platformName),
-                  onTap: () async {
-                    try {
-                      await results[index].device.connect();
-                    } catch (e) {
+      body: SafeArea(
+        child: StreamBuilder(
+          stream: FlutterBluePlus.scanResults,
+          builder: (context, snapshot) {
+            if (snapshot.data case final results?) {
+              return ListView.builder(
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(results[index].device.platformName),
+                    onTap: () async {
+                      try {
+                        await results[index].device.connect();
+                      } catch (e) {
+                        if (context.mounted) {
+                          return await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return SimpleDialog(
+                                children: [
+                                  Text(e.toString()),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      }
+
                       if (context.mounted) {
-                        return await showDialog(
-                          context: context,
-                          builder: (context) {
-                            return SimpleDialog(
-                              children: [
-                                Text(e.toString()),
-                              ],
-                            );
-                          },
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return DeviceScreen(
+                                device: results[index].device,
+                              );
+                            },
+                          ),
                         );
                       }
-                    }
+                    },
+                  );
+                },
+                itemCount: results.length,
+              );
+            }
 
-                    if (context.mounted) {
-                      await Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return DeviceScreen(
-                              device: results[index].device,
-                            );
-                          },
-                        ),
-                      );
-                    }
-                  },
-                );
-              },
-              itemCount: results.length,
+            if (snapshot.error case final error?) {
+              return Center(
+                child: Text('$error'),
+              );
+            }
+
+            return const Center(
+              child: CircularProgressIndicator(),
             );
-          }
-
-          if (snapshot.error case final error?) {
-            return Center(
-              child: Text('$error'),
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          try {
+            await FlutterBluePlus.startScan(
+              withKeywords: [
+                'Triones',
+              ],
+              timeout: const Duration(
+                seconds: 5,
+              ),
             );
+          } catch (e) {
+            if (context.mounted) {
+              return await showDialog(
+                context: context,
+                builder: (context) {
+                  return SimpleDialog(
+                    children: [
+                      Text(e.toString()),
+                    ],
+                  );
+                },
+              );
+            }
           }
-
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
         },
+        icon: const Icon(Icons.bluetooth_searching),
+        label: const Text('Scan'),
       ),
     );
   }
