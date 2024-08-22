@@ -359,7 +359,7 @@ class _DeviceScreenState extends State<DeviceScreen> {
     super.initState();
 
     _client = TrionesClient(
-      device: FlutterBluePlusBluetoothDevice(
+      bluetoothService: FlutterBluePlusBluetoothService(
         device: widget.device,
       ),
     );
@@ -396,65 +396,60 @@ extension on Color {
   }
 }
 
-class FlutterBluePlusBluetoothCharacteristic
-    implements TrionesBluetoothCharacteristic {
-  final BluetoothCharacteristic _characteristic;
-
-  FlutterBluePlusBluetoothCharacteristic({
-    required BluetoothCharacteristic characteristic,
-  }) : _characteristic = characteristic;
-
-  @override
-  Future<List<int>> read() async {
-    return await _characteristic.read();
-  }
-
-  @override
-  Future<void> write(List<int> value) async {
-    await _characteristic.write(value);
-  }
-}
-
-class FlutterBluePlusBluetoothDevice implements TrionesBluetoothDevice {
+class FlutterBluePlusBluetoothService implements TrionesBluetoothService {
   final BluetoothDevice _device;
 
-  FlutterBluePlusBluetoothDevice({
+  FlutterBluePlusBluetoothService({
     required BluetoothDevice device,
   }) : _device = device;
 
   @override
-  Future<TrionesBluetoothService> getService(String uuid) async {
+  Future<List<int>> readCharacteristic(
+    String serviceUuid,
+    String characteristicUuid,
+  ) async {
+    final characteristic = await _getCharacteristic(
+      serviceUuid,
+      characteristicUuid,
+    );
+
+    return await characteristic.read();
+  }
+
+  @override
+  Future<void> writeCharacteristic(
+    String serviceUuid,
+    String characteristicUuid,
+    List<int> value,
+  ) async {
+    final characteristic = await _getCharacteristic(
+      serviceUuid,
+      characteristicUuid,
+    );
+
+    await characteristic.write(value);
+  }
+
+  Future<BluetoothCharacteristic> _getCharacteristic(
+    String serviceUuid,
+    String characteristicUuid,
+  ) async {
     if (_device.servicesList.isEmpty) {
       await _device.discoverServices();
     }
 
-    return FlutterBluePlusBluetoothService(
-      service: _device.servicesList.singleWhere(
-        (service) {
-          return service.uuid == Guid.fromString(uuid);
-        },
-      ),
-    );
-  }
-}
+    for (final service in _device.servicesList) {
+      if (service.uuid == Guid.fromString(serviceUuid)) {
+        for (final characteristic in service.characteristics) {
+          if (characteristic.uuid == Guid.fromString(characteristicUuid)) {
+            return characteristic;
+          }
+        }
 
-class FlutterBluePlusBluetoothService implements TrionesBluetoothService {
-  final BluetoothService _service;
+        throw Exception('Failed to find the characteristic.');
+      }
+    }
 
-  FlutterBluePlusBluetoothService({
-    required BluetoothService service,
-  }) : _service = service;
-
-  @override
-  Future<TrionesBluetoothCharacteristic> getCharacteristic(String uuid) {
-    return Future.value(
-      FlutterBluePlusBluetoothCharacteristic(
-        characteristic: _service.characteristics.singleWhere(
-          (characteristic) {
-            return characteristic.uuid == Guid.fromString(uuid);
-          },
-        ),
-      ),
-    );
+    throw Exception('Failed to find the service.');
   }
 }

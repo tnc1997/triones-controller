@@ -11,11 +11,11 @@ class TrionesBluetoothServiceUuids {
 }
 
 class TrionesClient {
-  final TrionesBluetoothDevice _device;
+  final TrionesBluetoothService _bluetoothService;
 
   TrionesClient({
-    required TrionesBluetoothDevice device,
-  }) : _device = device;
+    required TrionesBluetoothService bluetoothService,
+  }) : _bluetoothService = bluetoothService;
 
   Future<void> setColor(
     int red,
@@ -26,23 +26,19 @@ class TrionesClient {
     RangeError.checkValueInInterval(green, 0x00, 0xFF, 'green');
     RangeError.checkValueInInterval(blue, 0x00, 0xFF, 'blue');
 
-    final service = await _device.getService(
+    await _bluetoothService.writeCharacteristic(
       TrionesBluetoothServiceUuids.wrgb,
-    );
-
-    final characteristic = await service.getCharacteristic(
       TrionesBluetoothCharacteristicUuids.wrgb,
+      [
+        0x56,
+        red,
+        green,
+        blue,
+        0x00,
+        0xF0,
+        0xAA,
+      ],
     );
-
-    await characteristic.write([
-      0x56,
-      red,
-      green,
-      blue,
-      0x00,
-      0xF0,
-      0xAA,
-    ]);
   }
 
   Future<void> setMode(
@@ -52,20 +48,16 @@ class TrionesClient {
     RangeError.checkValueInInterval(mode, 0x25, 0x38, 'mode');
     RangeError.checkValueInInterval(speed, 0x00, 0xFF, 'speed');
 
-    final service = await _device.getService(
+    await _bluetoothService.writeCharacteristic(
       TrionesBluetoothServiceUuids.wrgb,
-    );
-
-    final characteristic = await service.getCharacteristic(
       TrionesBluetoothCharacteristicUuids.wrgb,
+      [
+        0xBB,
+        mode,
+        speed,
+        0x44,
+      ],
     );
-
-    await characteristic.write([
-      0xBB,
-      mode,
-      speed,
-      0x44,
-    ]);
   }
 
   Future<void> setWhite({
@@ -73,55 +65,43 @@ class TrionesClient {
   }) async {
     RangeError.checkValueInInterval(brightness, 0x00, 0xFF, 'brightness');
 
-    final service = await _device.getService(
+    await _bluetoothService.writeCharacteristic(
       TrionesBluetoothServiceUuids.wrgb,
-    );
-
-    final characteristic = await service.getCharacteristic(
       TrionesBluetoothCharacteristicUuids.wrgb,
+      [
+        0x56,
+        0x00,
+        0x00,
+        0x00,
+        brightness,
+        0x0F,
+        0xAA,
+      ],
     );
-
-    await characteristic.write([
-      0x56,
-      0x00,
-      0x00,
-      0x00,
-      brightness,
-      0x0F,
-      0xAA,
-    ]);
   }
 
   Future<void> turnOff() async {
-    final service = await _device.getService(
+    await _bluetoothService.writeCharacteristic(
       TrionesBluetoothServiceUuids.wrgb,
-    );
-
-    final characteristic = await service.getCharacteristic(
       TrionesBluetoothCharacteristicUuids.wrgb,
+      [
+        0xCC,
+        0x24,
+        0x33,
+      ],
     );
-
-    await characteristic.write([
-      0xCC,
-      0x24,
-      0x33,
-    ]);
   }
 
   Future<void> turnOn() async {
-    final service = await _device.getService(
+    await _bluetoothService.writeCharacteristic(
       TrionesBluetoothServiceUuids.wrgb,
-    );
-
-    final characteristic = await service.getCharacteristic(
       TrionesBluetoothCharacteristicUuids.wrgb,
+      [
+        0xCC,
+        0x23,
+        0x33,
+      ],
     );
-
-    await characteristic.write([
-      0xCC,
-      0x23,
-      0x33,
-    ]);
   }
 }
 
@@ -152,23 +132,17 @@ class TrionesModes {
   static const rainbowJumpingChange = 0x38;
 }
 
-/// Represents a characteristic provided by a service.
-abstract interface class TrionesBluetoothCharacteristic {
-  /// Reads the value from this characteristic.
-  Future<List<int>> read();
-
-  /// Writes the [value] to this characteristic.
-  Future<void> write(List<int> value);
-}
-
-/// Represents a device.
-abstract interface class TrionesBluetoothDevice {
-  /// Gets the service for the [uuid].
-  Future<TrionesBluetoothService> getService(String uuid);
-}
-
-/// Represents a service provided by a device.
 abstract interface class TrionesBluetoothService {
-  /// Gets the characteristic for the [uuid].
-  Future<TrionesBluetoothCharacteristic> getCharacteristic(String uuid);
+  /// Reads the value from the characteristic for the [serviceUuid] and the [characteristicUuid].
+  Future<List<int>> readCharacteristic(
+    String serviceUuid,
+    String characteristicUuid,
+  );
+
+  /// Writes the [value] to the characteristic for the [serviceUuid] and the [characteristicUuid].
+  Future<void> writeCharacteristic(
+    String serviceUuid,
+    String characteristicUuid,
+    List<int> value,
+  );
 }
