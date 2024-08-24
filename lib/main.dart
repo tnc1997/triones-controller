@@ -32,16 +32,25 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ScanScreen extends StatelessWidget {
+class ScanScreen extends StatefulWidget {
   const ScanScreen({
     super.key,
   });
 
   @override
+  State<ScanScreen> createState() {
+    return _ScanScreenState();
+  }
+}
+
+class _ScanScreenState extends State<ScanScreen> {
+  bool? _isConnecting;
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: StreamBuilder(
+        child: StreamBuilder<List<ScanResult>>(
           stream: FlutterBluePlus.scanResults,
           builder: (context, snapshot) {
             if (snapshot.data case final results?) {
@@ -49,9 +58,26 @@ class ScanScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Text(results[index].device.platformName),
+                    enabled: _isConnecting != true,
                     onTap: () async {
                       try {
+                        setState(() {
+                          _isConnecting = true;
+                        });
+
                         await results[index].device.connect();
+
+                        if (context.mounted) {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return DeviceScreen(
+                                  device: results[index].device,
+                                );
+                              },
+                            ),
+                          );
+                        }
                       } catch (e) {
                         if (context.mounted) {
                           return await showDialog(
@@ -65,18 +91,10 @@ class ScanScreen extends StatelessWidget {
                             },
                           );
                         }
-                      }
-
-                      if (context.mounted) {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return DeviceScreen(
-                                device: results[index].device,
-                              );
-                            },
-                          ),
-                        );
+                      } finally {
+                        setState(() {
+                          _isConnecting = false;
+                        });
                       }
                     },
                   );
