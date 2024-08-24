@@ -115,34 +115,41 @@ class _ScanScreenState extends State<ScanScreen> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          try {
-            await FlutterBluePlus.startScan(
-              withKeywords: [
-                'Triones',
-              ],
-              timeout: const Duration(
-                seconds: 5,
-              ),
-            );
-          } catch (e) {
-            if (context.mounted) {
-              return await showDialog(
-                context: context,
-                builder: (context) {
-                  return SimpleDialog(
-                    children: [
-                      Text(e.toString()),
-                    ],
-                  );
-                },
-              );
-            }
-          }
+      floatingActionButton: StreamBuilder<bool>(
+        stream: FlutterBluePlus.isScanning,
+        builder: (context, snapshot) {
+          return FloatingActionButton.extended(
+            onPressed: snapshot.data != true
+                ? () async {
+                    try {
+                      await FlutterBluePlus.startScan(
+                        withKeywords: [
+                          'Triones',
+                        ],
+                        timeout: const Duration(
+                          seconds: 5,
+                        ),
+                      );
+                    } catch (e) {
+                      if (context.mounted) {
+                        return await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return SimpleDialog(
+                              children: [
+                                Text(e.toString()),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
+                  }
+                : null,
+            icon: const Icon(Icons.bluetooth_searching),
+            label: const Text('Scan'),
+          );
         },
-        icon: const Icon(Icons.bluetooth_searching),
-        label: const Text('Scan'),
       ),
     );
   }
