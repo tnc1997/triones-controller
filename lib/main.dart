@@ -48,109 +48,113 @@ class _ScanScreenState extends State<ScanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: StreamBuilder<List<ScanResult>>(
-          stream: FlutterBluePlus.scanResults,
-          builder: (context, snapshot) {
-            if (snapshot.data case final results?) {
-              return ListView.builder(
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(results[index].device.platformName),
-                    enabled: _isConnecting != true,
-                    onTap: () async {
-                      try {
-                        setState(() {
-                          _isConnecting = true;
-                        });
+    return StreamBuilder<bool>(
+      stream: FlutterBluePlus.isScanning,
+      builder: (context, snapshot) {
+        FloatingActionButton? floatingActionButton;
 
-                        await results[index].device.connect();
-
-                        if (context.mounted) {
-                          await Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return DeviceScreen(
-                                  device: results[index].device,
-                                );
-                              },
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        if (context.mounted) {
-                          return await showDialog(
-                            context: context,
-                            builder: (context) {
-                              return SimpleDialog(
-                                children: [
-                                  Text(e.toString()),
-                                ],
-                              );
-                            },
-                          );
-                        }
-                      } finally {
-                        setState(() {
-                          _isConnecting = false;
-                        });
-                      }
+        if (snapshot.data != true) {
+          floatingActionButton = FloatingActionButton.extended(
+            onPressed: () async {
+              try {
+                await FlutterBluePlus.startScan(
+                  withKeywords: [
+                    'Triones',
+                  ],
+                  timeout: const Duration(
+                    seconds: 5,
+                  ),
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  return await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return SimpleDialog(
+                        children: [
+                          Text(e.toString()),
+                        ],
+                      );
                     },
                   );
-                },
-                itemCount: results.length,
-              );
-            }
-
-            if (snapshot.error case final error?) {
-              return Center(
-                child: Text('$error'),
-              );
-            }
-
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          },
-        ),
-      ),
-      floatingActionButton: StreamBuilder<bool>(
-        stream: FlutterBluePlus.isScanning,
-        builder: (context, snapshot) {
-          return FloatingActionButton.extended(
-            onPressed: snapshot.data != true
-                ? () async {
-                    try {
-                      await FlutterBluePlus.startScan(
-                        withKeywords: [
-                          'Triones',
-                        ],
-                        timeout: const Duration(
-                          seconds: 5,
-                        ),
-                      );
-                    } catch (e) {
-                      if (context.mounted) {
-                        return await showDialog(
-                          context: context,
-                          builder: (context) {
-                            return SimpleDialog(
-                              children: [
-                                Text(e.toString()),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    }
-                  }
-                : null,
+                }
+              }
+            },
             icon: const Icon(Icons.bluetooth_searching),
             label: const Text('Scan'),
           );
-        },
-      ),
+        }
+
+        return Scaffold(
+          body: SafeArea(
+            child: StreamBuilder<List<ScanResult>>(
+              stream: FlutterBluePlus.scanResults,
+              builder: (context, snapshot) {
+                if (snapshot.data case final results?) {
+                  return ListView.builder(
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(results[index].device.platformName),
+                        enabled: _isConnecting != true,
+                        onTap: () async {
+                          try {
+                            setState(() {
+                              _isConnecting = true;
+                            });
+
+                            await results[index].device.connect();
+
+                            if (context.mounted) {
+                              await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return DeviceScreen(
+                                      device: results[index].device,
+                                    );
+                                  },
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return SimpleDialog(
+                                    children: [
+                                      Text(e.toString()),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          } finally {
+                            setState(() {
+                              _isConnecting = false;
+                            });
+                          }
+                        },
+                      );
+                    },
+                    itemCount: results.length,
+                  );
+                }
+
+                if (snapshot.error case final error?) {
+                  return Center(
+                    child: Text('$error'),
+                  );
+                }
+
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+          ),
+          floatingActionButton: floatingActionButton,
+        );
+      },
     );
   }
 }
