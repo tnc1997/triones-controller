@@ -157,6 +157,24 @@ class _ScanScreenState extends State<ScanScreen> {
       },
     );
   }
+
+  @override
+  void initState() {
+    super.initState();
+
+    try {
+      FlutterBluePlus.startScan(
+        withKeywords: [
+          'Triones',
+        ],
+        timeout: const Duration(
+          seconds: 5,
+        ),
+      );
+    } catch (e) {
+      // ignored
+    }
+  }
 }
 
 class DeviceScreen extends StatefulWidget {
