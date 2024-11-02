@@ -275,9 +275,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
                                 );
 
                                 await _client.setColor(
-                                  color.red,
-                                  color.green,
-                                  color.blue,
+                                  (255 * color.r).round(),
+                                  (255 * color.g).round(),
+                                  (255 * color.b).round(),
                                 );
                               });
                             },
@@ -315,9 +315,9 @@ class _DeviceScreenState extends State<DeviceScreen> {
                             );
 
                             await _client.setColor(
-                              color.red,
-                              color.green,
-                              color.blue,
+                              (255 * color.r).round(),
+                              (255 * color.g).round(),
+                              (255 * color.b).round(),
                             );
                           });
                         },
@@ -434,11 +434,11 @@ class Debouncer {
 
 extension on Color {
   Color withBrightness(double brightness) {
-    return Color.fromARGB(
-      alpha,
-      (red * brightness).round(),
-      (green * brightness).round(),
-      (blue * brightness).round(),
+    return Color.from(
+      alpha: a,
+      red: r * brightness,
+      green: g * brightness,
+      blue: b * brightness,
     );
   }
 }
