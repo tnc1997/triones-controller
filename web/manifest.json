@@ -3,7 +3,7 @@
     "short_name": "Controller for Triones",
     "start_url": ".",
     "display": "standalone",
-    "theme_color": "#00006e",
+    "theme_color": "#031e40",
     "description": "Please note that Controller for Triones is unofficial and not endorsed by Triones.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,

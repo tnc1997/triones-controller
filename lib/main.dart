@@ -21,11 +21,11 @@ class MyApp extends StatelessWidget {
       title: 'Controller for Triones',
       theme: ThemeData(
         brightness: Brightness.light,
-        colorSchemeSeed: const Color(0xFF00006E),
+        colorSchemeSeed: const Color(0xFF031E40),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        colorSchemeSeed: const Color(0xFF00006E),
+        colorSchemeSeed: const Color(0xFF031E40),
       ),
       home: const ScanScreen(),
     );
